@@ -45,8 +45,10 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({ label, image, onIm
       <div 
         className={`
           relative border-2 border-dashed rounded-xl p-4 transition-all duration-200 h-32 flex flex-col items-center justify-center text-center cursor-pointer group
-          ${isDragging ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-indigo-300 hover:bg-gray-50'}
-          ${image ? 'bg-gray-50' : 'bg-white'}
+          ${isDragging 
+            ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20' 
+            : 'border-gray-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-500 hover:bg-gray-50 dark:hover:bg-slate-800'}
+          ${image ? 'bg-gray-50 dark:bg-slate-800' : 'bg-white dark:bg-slate-900'}
         `}
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
@@ -69,17 +71,17 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({ label, image, onIm
                 e.stopPropagation();
                 onImageChange(null);
               }}
-              className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-md border border-gray-100 hover:text-red-500"
+              className="absolute -top-2 -right-2 bg-white dark:bg-slate-700 rounded-full p-1 shadow-md border border-gray-100 dark:border-slate-600 text-gray-500 dark:text-slate-300 hover:text-red-500 dark:hover:text-red-400"
             >
               <X className="w-3 h-3" />
             </button>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-2">
-            <div className="text-gray-400 group-hover:text-indigo-500 transition-colors">
+            <div className="text-gray-400 dark:text-slate-500 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors">
               {icon || <Upload className="w-6 h-6" />}
             </div>
-            <p className="text-xs font-medium text-gray-500">{label}</p>
+            <p className="text-xs font-medium text-gray-500 dark:text-slate-400">{label}</p>
           </div>
         )}
       </div>

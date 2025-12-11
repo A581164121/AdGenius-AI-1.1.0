@@ -25,8 +25,8 @@ export const AspectRatioSelector: React.FC<Props> = ({ selected, onChange }) => 
           className={`
             flex flex-col items-center justify-center p-2 rounded-lg border transition-all duration-200
             ${selected === ratio.value 
-              ? 'border-indigo-600 bg-indigo-50 text-indigo-700 shadow-sm' 
-              : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:bg-gray-50'}
+              ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 shadow-sm' 
+              : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-500 dark:text-slate-400 hover:border-gray-300 dark:hover:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-800'}
           `}
         >
           <ratio.icon className={`w-4 h-4 mb-1 ${selected === ratio.value ? 'stroke-[2.5px]' : ''}`} />

@@ -163,6 +163,10 @@ export const generateAdvertisementImage = async (config: AdConfiguration): Promi
 
     prompt += `The final output should be suitable for marketing and advertising purposes. The lighting should be cinematic and studio-quality. Photorealistic 8k resolution, clean and professional composition.`;
 
+    // Add Negative Prompt
+    const negativePrompt = "Do not generate low-resolution images, cartoonish designs, unrealistic proportions, cluttered layouts, or unprofessional components. Do not include text overlays or watermarks.";
+    prompt += ` \n\nNegative prompt: ${negativePrompt}`;
+
     parts.push({ text: prompt });
 
     // 3. Call the API

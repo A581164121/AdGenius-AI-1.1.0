@@ -23,3 +23,16 @@ export interface GenerationResult {
 }
 
 export type OptimizeTarget = 'product' | 'scene';
+
+export type Theme = 'light' | 'dark' | 'white';
+
+export type View = 'generator' | 'templates' | 'showcase' | 'pricing';
+
+export interface Template {
+  id: string;
+  title: string;
+  description: string;
+  icon: any;
+  config: Partial<AdConfiguration>;
+  color: string;
+}

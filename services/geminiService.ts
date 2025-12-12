@@ -161,10 +161,71 @@ export const generateAdvertisementImage = async (config: AdConfiguration): Promi
       prompt += `Include the text "${config.brandText}" naturally in the composition or as a stylish overlay suitable for an ad. `;
     }
 
+    if (config.creativeText && config.creativeText.textContent) {
+  const containsArabic = /[\u0600-\u06FF]/.test(config.creativeText.textContent);
+
+  prompt += `
+========================
+🎨 CREATIVE TEXT OVERLAY — HIGH PRIORITY
+========================
+
+You MUST add a clear, sharp, correct text overlay on the final advertisement.
+
+TEXT CONTENT (exact, do not modify):
+"${config.creativeText.textContent}"
+
+STYLE SPECS:
+- Font/Calligraphy: STRICTLY "${config.creativeText.fontStyle}"
+- Size: ${config.creativeText.textSize}
+- Color: ${config.creativeText.textColor}
+- Position: ${config.creativeText.textPosition}
+- Shadow: ${config.creativeText.textShadow}
+- Background Blur Layer: ${config.creativeText.backgroundBlur}
+
+PLACEMENT RULES:
+- Text must be placed EXACTLY at "${config.creativeText.textPosition}"
+- Must not overlap eyes, face, body or product
+- Must be aligned cleanly with margin padding
+- Must appear as clean printed text, not painted/distorted strokes
+
+CRITICAL TEXT QUALITY RULES:
+- Crisp 8K resolution
+- No pixelation
+- No distortion
+- Correct spacing and ligatures
+- Smooth anti-aliasing
+- Commercial-grade typography output
+
+DO NOT:
+- Do NOT change the wording
+- Do NOT change the style
+- Do NOT warp or merge text into scenery
+- Do NOT draw text as painterly strokes
+- Do NOT approximate shapes
+
+${containsArabic ? `
+========================
+🕌 URDU/ARABIC CALLIGRAPHY (EXTREME PRIORITY)
+========================
+The text is in ARABIC SCRIPT. STRICT REQUIREMENTS:
+
+- MUST render in authentic "${config.creativeText.fontStyle}" (Nastaliq/Naskh/Thuluth/Kufic)
+- MUST use natural ligatures (لا، کی، میں، ہیں، اللہ، محمد ﷺ etc.)
+- MUST render baseline flow naturally
+- MUST preserve real calligraphic curvature
+- MUST NOT use Latin-based rounded fonts
+- MUST NOT simplify shapes
+- MUST NOT break Urdu letters apart
+- PRIORITIZE TEXT QUALITY ABOVE ALL OTHER VISUAL ELEMENTS
+` : ''}
+FOLLOW ALL ABOVE INSTRUCTIONS EXACTLY.
+`;
+}
+
     prompt += `The final output should be suitable for marketing and advertising purposes. The lighting should be cinematic and studio-quality. Photorealistic 8k resolution, clean and professional composition.`;
 
     // Add Negative Prompt
-    const negativePrompt = "Do not generate low-resolution images, cartoonish designs, unrealistic proportions, cluttered layouts, or unprofessional components. Do not include text overlays or watermarks.";
+    const negativePrompt = "Do not generate low-resolution images, cartoonish designs, unrealistic proportions, cluttered layouts, or unprofessional components. Do not include text overlays or watermarks unless explicitly requested.";
     prompt += ` \n\nNegative prompt: ${negativePrompt}`;
 
     parts.push({ text: prompt });

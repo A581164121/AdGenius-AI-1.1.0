@@ -1,15 +1,17 @@
 import React from 'react';
-import { Sparkles, LayoutTemplate, Image as ImageIcon, Wallet, Sun, Moon, Monitor, PenTool } from 'lucide-react';
-import { Theme, View } from '../types';
+import { Sparkles, LayoutTemplate, Image as ImageIcon, Wallet, Sun, Moon, Monitor, PenTool, LogIn, LogOut } from 'lucide-react';
+import { Theme, View, User } from '../types';
 
 interface HeaderProps {
   theme: Theme;
   onThemeChange: (theme: Theme) => void;
   currentView: View;
   onViewChange: (view: View) => void;
+  user: User | null;
+  onLogout: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ theme, onThemeChange, currentView, onViewChange }) => {
+export const Header: React.FC<HeaderProps> = ({ theme, onThemeChange, currentView, onViewChange, user, onLogout }) => {
   const navItemClass = (view: View) => `
     text-sm font-medium transition-colors flex items-center gap-2 px-3 py-2 rounded-lg
     ${currentView === view 
@@ -67,8 +69,33 @@ export const Header: React.FC<HeaderProps> = ({ theme, onThemeChange, currentVie
              </button>
           </div>
           
-          <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-700 dark:text-indigo-300 font-bold text-xs border border-transparent dark:border-indigo-800">
-            JD
+          <div className="pl-4 border-l border-gray-200 dark:border-slate-800">
+            {user ? (
+              <div className="flex items-center gap-3">
+                <div className="hidden sm:block text-right">
+                  <p className="text-xs font-medium text-slate-900 dark:text-white">{user.firstName} {user.lastName}</p>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate max-w-[100px]">{user.email}</p>
+                </div>
+                <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-700 dark:text-indigo-300 font-bold text-xs border border-transparent dark:border-indigo-800">
+                  {user.firstName[0]}{user.lastName[0]}
+                </div>
+                <button 
+                  onClick={onLogout}
+                  className="p-2 text-slate-400 hover:text-red-500 transition-colors"
+                  title="Sign Out"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <button 
+                onClick={() => onViewChange('auth')}
+                className="flex items-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-800 dark:hover:bg-gray-100 transition-colors shadow-sm"
+              >
+                <LogIn className="w-4 h-4" />
+                Sign In
+              </button>
+            )}
           </div>
         </div>
       </div>

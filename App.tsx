@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { Header } from './components/Header';
 import { ImageUploader } from './components/ImageUploader';
 import { AspectRatioSelector } from './components/AspectRatioSelector';
-import { AdConfiguration, AspectRatio, OptimizeTarget, Theme, View } from './types';
+import { AdConfiguration, AspectRatio, OptimizeTarget, Theme, View, User } from './types';
 import { generateAdvertisementImage, optimizeTextPrompt, editGeneratedImage } from './services/geminiService';
-import { Wand2, User, ShoppingBag, Box, Loader2, Sparkles, Download, Share2, Image as ImageIcon, Eraser, PlusCircle, ArrowRight, X, ScanFace } from 'lucide-react';
+import { Wand2, User as UserIcon, ShoppingBag, Box, Loader2, Sparkles, Download, Share2, Image as ImageIcon, Eraser, PlusCircle, ArrowRight, X, ScanFace, Type } from 'lucide-react';
 import { TemplatesView } from './components/TemplatesView';
 import { ShowcaseView } from './components/ShowcaseView';
 import { PricingView } from './components/PricingView';
+import { AuthView } from './components/AuthView';
 
 function App() {
   const [config, setConfig] = useState<AdConfiguration>({
@@ -15,6 +16,15 @@ function App() {
     productImage: null,
     productDescription: "",
     brandText: "",
+    creativeText: {
+      textContent: "",
+      fontStyle: "Bold Sans",
+      textSize: "Medium",
+      textColor: "White",
+      textPosition: "Bottom Center",
+      textShadow: "Soft Shadow",
+      backgroundBlur: "None"
+    },
     sceneDescription: "A confident young professional standing in a modern, sunlit city street.",
     aspectRatio: AspectRatio.SQUARE,
     mode: 'auto',
@@ -25,9 +35,10 @@ function App() {
   const [isOptimizing, setIsOptimizing] = useState<OptimizeTarget | null>(null);
   const [error, setError] = useState<string | null>(null);
   
-  // Theme & View State
+  // Theme, View & Auth State
   const [theme, setTheme] = useState<Theme>('light');
   const [currentView, setCurrentView] = useState<View>('generator');
+  const [user, setUser] = useState<User | null>(null);
 
   // Magic Edit State
   const [editMode, setEditMode] = useState<'background' | 'add' | 'remove' | null>(null);
@@ -37,10 +48,30 @@ function App() {
     setConfig(prev => ({ ...prev, [key]: value }));
   };
 
+  const handleCreativeTextChange = (key: keyof AdConfiguration['creativeText'], value: string) => {
+    setConfig(prev => ({
+      ...prev,
+      creativeText: {
+        ...prev.creativeText,
+        [key]: value
+      }
+    }));
+  };
+
   const handleTemplateSelect = (templateConfig: Partial<AdConfiguration>) => {
     setConfig(prev => ({ ...prev, ...templateConfig }));
     setCurrentView('generator');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleLogin = (userData: User) => {
+    setUser(userData);
+    setCurrentView('generator');
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setCurrentView('auth');
   };
 
   const handleGenerate = async () => {
@@ -137,6 +168,9 @@ function App() {
     return 'bg-gray-50'; // light
   };
 
+  // Validation for Generate Button: Requires Model + Product, but Creative Text is optional
+  const isGenerateDisabled = isGenerating || (!config.modelImage || !config.productImage);
+
   return (
     <div className={`min-h-screen flex flex-col transition-colors duration-200 ${getMainBackground()} ${theme === 'dark' ? 'dark' : ''}`}>
       <Header 
@@ -144,7 +178,15 @@ function App() {
         onThemeChange={setTheme} 
         currentView={currentView}
         onViewChange={setCurrentView}
+        user={user}
+        onLogout={handleLogout}
       />
+
+      {currentView === 'auth' && (
+        <main className="flex-1">
+          <AuthView onLogin={handleLogin} />
+        </main>
+      )}
 
       {currentView === 'generator' && (
         <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-300">
@@ -161,7 +203,7 @@ function App() {
             <div className="w-full lg:w-[400px] bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-800 p-6 flex flex-col gap-6 shrink-0 transition-colors">
               
               <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-medium">
-                <User className="w-5 h-5" />
+                <UserIcon className="w-5 h-5" />
                 <h2>Configuration</h2>
               </div>
 
@@ -171,7 +213,7 @@ function App() {
                   { id: 'auto', label: 'Auto', icon: ScanFace },
                   { id: 'object', label: 'Object', icon: Box },
                   { id: 'garment', label: 'Wear', icon: ShoppingBag },
-                  { id: 'person', label: 'Life', icon: User },
+                  { id: 'person', label: 'Life', icon: UserIcon },
                 ].map((m) => (
                   <button
                     key={m.id}
@@ -196,7 +238,7 @@ function App() {
                     label="Upload Base" 
                     image={config.modelImage} 
                     onImageChange={(val) => handleConfigChange('modelImage', val)}
-                    icon={<User className="w-6 h-6" />}
+                    icon={<UserIcon className="w-6 h-6" />}
                   />
                 </div>
                 <div className="flex flex-col gap-2">
@@ -243,6 +285,127 @@ function App() {
                 />
               </div>
 
+              {/* Creative Text Overlay */}
+              <div className="flex flex-col gap-4 border-t border-b border-gray-100 dark:border-slate-800 py-4">
+                <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-medium">
+                  <Type className="w-4 h-4" />
+                  <div>
+                    <h3 className="text-sm font-semibold">Creative Text Overlay</h3>
+                    <p className="text-[10px] text-gray-500 dark:text-slate-400 font-normal">Styled Calligraphy / Artistic Text Placement</p>
+                  </div>
+                </div>
+
+                {/* Text Content */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Text to Render</label>
+                  <input
+                    type="text"
+                    className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                    placeholder="Enter Urdu, Arabic, or English text"
+                    value={config.creativeText.textContent}
+                    onChange={(e) => handleCreativeTextChange('textContent', e.target.value)}
+                  />
+                </div>
+
+                {/* Grid for settings */}
+                <div className="grid grid-cols-2 gap-3">
+                    {/* Font Style */}
+                    <div className="flex flex-col gap-1">
+                        <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Font Style</label>
+                        <select
+                            className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg p-2 text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
+                            value={config.creativeText.fontStyle}
+                            onChange={(e) => handleCreativeTextChange('fontStyle', e.target.value)}
+                        >
+                            <option value="Urdu Nastaliq">Urdu Nastaliq</option>
+                            <option value="Arabic Thuluth">Arabic Thuluth</option>
+                            <option value="Arabic Naskh">Arabic Naskh</option>
+                            <option value="Arabic Diwani">Arabic Diwani</option>
+                            <option value="Kufic">Kufic</option>
+                            <option value="Bold Sans">Bold Sans</option>
+                            <option value="Modern Serif">Modern Serif</option>
+                        </select>
+                    </div>
+
+                    {/* Text Size */}
+                    <div className="flex flex-col gap-1">
+                        <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Text Size</label>
+                        <select
+                            className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg p-2 text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
+                            value={config.creativeText.textSize}
+                            onChange={(e) => handleCreativeTextChange('textSize', e.target.value)}
+                        >
+                            <option value="Small">Small</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Large">Large</option>
+                            <option value="Extra Large">Extra Large</option>
+                        </select>
+                    </div>
+
+                    {/* Text Color */}
+                    <div className="flex flex-col gap-1">
+                        <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Text Color</label>
+                        <select
+                            className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg p-2 text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
+                            value={config.creativeText.textColor}
+                            onChange={(e) => handleCreativeTextChange('textColor', e.target.value)}
+                        >
+                            <option value="White">White</option>
+                            <option value="Black">Black</option>
+                            <option value="Gold">Gold</option>
+                            <option value="Custom Hex">Custom Hex</option>
+                        </select>
+                    </div>
+
+                    {/* Text Position */}
+                    <div className="flex flex-col gap-1">
+                        <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Placement</label>
+                        <select
+                            className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg p-2 text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
+                            value={config.creativeText.textPosition}
+                            onChange={(e) => handleCreativeTextChange('textPosition', e.target.value)}
+                        >
+                            <option value="Top Left">Top Left</option>
+                            <option value="Top Center">Top Center</option>
+                            <option value="Top Right">Top Right</option>
+                            <option value="Center">Center</option>
+                            <option value="Bottom Left">Bottom Left</option>
+                            <option value="Bottom Center">Bottom Center</option>
+                            <option value="Bottom Right">Bottom Right</option>
+                        </select>
+                    </div>
+
+                    {/* Shadow */}
+                    <div className="flex flex-col gap-1">
+                        <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Shadow</label>
+                        <select
+                            className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg p-2 text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
+                            value={config.creativeText.textShadow}
+                            onChange={(e) => handleCreativeTextChange('textShadow', e.target.value)}
+                        >
+                            <option value="None">None</option>
+                            <option value="Soft Shadow">Soft Shadow</option>
+                            <option value="Strong Shadow">Strong Shadow</option>
+                            <option value="Glow">Glow</option>
+                        </select>
+                    </div>
+
+                    {/* Readability */}
+                    <div className="flex flex-col gap-1">
+                        <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Readability</label>
+                        <select
+                            className="w-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg p-2 text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
+                            value={config.creativeText.backgroundBlur}
+                            onChange={(e) => handleCreativeTextChange('backgroundBlur', e.target.value)}
+                        >
+                            <option value="None">None</option>
+                            <option value="Light Blur">Light Blur</option>
+                            <option value="Dark Blur Box">Dark Blur Box</option>
+                        </select>
+                    </div>
+                </div>
+              </div>
+
               {/* Aspect Ratio */}
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Aspect Ratio</label>
@@ -276,7 +439,7 @@ function App() {
               {/* Action Button */}
               <button 
                 onClick={handleGenerate}
-                disabled={isGenerating}
+                disabled={isGenerateDisabled}
                 className="w-full bg-slate-900 dark:bg-indigo-600 hover:bg-slate-800 dark:hover:bg-indigo-500 text-white font-medium py-3 rounded-xl shadow-lg shadow-slate-200 dark:shadow-none transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isGenerating && !editMode ? (

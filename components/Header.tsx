@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Sparkles, LayoutTemplate, Image as ImageIcon, Wallet, Sun, Moon, Monitor, PenTool, LogIn, LogOut, Cloud, Lock } from 'lucide-react';
+import { Sparkles, LayoutTemplate, Image as ImageIcon, Wallet, Sun, Moon, Monitor, PenTool, LogIn, LogOut, Cloud } from 'lucide-react';
 import { Theme, View, User } from '../types';
 
 interface HeaderProps {
@@ -13,14 +13,11 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ theme, onThemeChange, currentView, onViewChange, user, onLogout }) => {
-  const isAuthRestricted = (view: View) => !user && view !== 'auth' && view !== 'showcase';
-
   const navItemClass = (view: View) => `
     group text-sm font-semibold transition-all flex items-center gap-2 px-4 py-2.5 rounded-xl
     ${currentView === view 
       ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 shadow-sm border border-indigo-100 dark:border-indigo-800' 
       : 'text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-50 dark:hover:bg-slate-800 border border-transparent'}
-    ${isAuthRestricted(view) ? 'opacity-50 cursor-not-allowed filter grayscale' : ''}
   `;
 
   return (
@@ -38,43 +35,26 @@ export const Header: React.FC<HeaderProps> = ({ theme, onThemeChange, currentVie
           </button>
 
           <nav className="hidden lg:flex items-center gap-1.5">
-            <button 
-              onClick={() => onViewChange('generator')} 
-              className={navItemClass('generator')}
-              title={!user ? "Login required" : "Create Ads"}
-            >
-              {!user && <Lock className="w-3 h-3" />}
+            <button onClick={() => onViewChange('generator')} className={navItemClass('generator')}>
               <PenTool className="w-4 h-4" /> Create
             </button>
-            <button 
-              onClick={() => onViewChange('templates')} 
-              className={navItemClass('templates')}
-              title={!user ? "Login required" : "Templates"}
-            >
-              {!user && <Lock className="w-3 h-3" />}
+            <button onClick={() => onViewChange('templates')} className={navItemClass('templates')}>
               <LayoutTemplate className="w-4 h-4" /> Templates
             </button>
-            <button 
-              onClick={() => onViewChange('showcase')} 
-              className={navItemClass('showcase')}
-            >
+            <button onClick={() => onViewChange('showcase')} className={navItemClass('showcase')}>
               <ImageIcon className="w-4 h-4" /> Showcase
             </button>
-            <button 
-              onClick={() => onViewChange('pricing')} 
-              className={navItemClass('pricing')}
-              title={!user ? "Login required" : "Pricing"}
-            >
-              {!user && <Lock className="w-3 h-3" />}
+            <button onClick={() => onViewChange('pricing')} className={navItemClass('pricing')}>
               <Wallet className="w-4 h-4" /> Pricing
             </button>
           </nav>
         </div>
 
         <div className="flex items-center gap-3 sm:gap-6">
+          {/* Status Badge */}
           <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-full border border-green-100 dark:border-green-900/30">
             <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
-            <span className="text-[10px] font-bold uppercase tracking-wider">Secure Access</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider">Cloud Connected</span>
             <Cloud className="w-3 h-3" />
           </div>
 

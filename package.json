@@ -2,6 +2,7 @@
   "name": "adgenius-ai-1.12.0",
   "private": true,
   "version": "0.0.0",
+  "homepage": ".",
   "type": "module",
   "scripts": {
     "dev": "vite",

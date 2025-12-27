@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { ImageUploader } from './components/ImageUploader';
 import { AspectRatioSelector } from './components/AspectRatioSelector';
@@ -44,6 +45,11 @@ function App() {
   const [editMode, setEditMode] = useState<'background' | 'add' | 'remove' | null>(null);
   const [editInput, setEditInput] = useState("");
 
+  const handleViewChange = (view: View) => {
+    setCurrentView(view);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleConfigChange = (key: keyof AdConfiguration, value: any) => {
     setConfig(prev => ({ ...prev, [key]: value }));
   };
@@ -60,24 +66,22 @@ function App() {
 
   const handleTemplateSelect = (templateConfig: Partial<AdConfiguration>) => {
     setConfig(prev => ({ ...prev, ...templateConfig }));
-    setCurrentView('generator');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    handleViewChange('generator');
   };
 
   const handleLogin = (userData: User) => {
     setUser(userData);
-    setCurrentView('generator');
+    handleViewChange('generator');
   };
 
   const handleLogout = () => {
     setUser(null);
-    setCurrentView('auth');
+    handleViewChange('auth');
   };
 
   const handleGenerate = async () => {
     setError(null);
     setIsGenerating(true);
-    // Reset edit state when regenerating
     setEditMode(null);
     setEditInput("");
     
@@ -142,7 +146,6 @@ function App() {
       const newImage = await editGeneratedImage(generatedImage, instruction);
       setGeneratedImage(newImage);
       
-      // Reset edit state
       setEditMode(null);
       setEditInput("");
     } catch (err: any) {
@@ -161,14 +164,12 @@ function App() {
     }
   };
 
-  // Background class based on theme
   const getMainBackground = () => {
     if (theme === 'dark') return 'bg-slate-950';
     if (theme === 'white') return 'bg-white';
-    return 'bg-gray-50'; // light
+    return 'bg-gray-50';
   };
 
-  // Validation for Generate Button: Requires Model + Product, but Creative Text is optional
   const isGenerateDisabled = isGenerating || (!config.modelImage || !config.productImage);
 
   return (
@@ -177,7 +178,7 @@ function App() {
         theme={theme} 
         onThemeChange={setTheme} 
         currentView={currentView}
-        onViewChange={setCurrentView}
+        onViewChange={handleViewChange}
         user={user}
         onLogout={handleLogout}
       />
@@ -198,16 +199,12 @@ function App() {
           </div>
 
           <div className="flex flex-col lg:flex-row gap-8 items-start">
-            
-            {/* LEFT COLUMN: CONFIGURATION */}
             <div className="w-full lg:w-[400px] bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-800 p-6 flex flex-col gap-6 shrink-0 transition-colors">
-              
               <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-medium">
                 <UserIcon className="w-5 h-5" />
                 <h2>Configuration</h2>
               </div>
 
-              {/* Mode Selection */}
               <div className="bg-gray-100 dark:bg-slate-800 p-1 rounded-lg grid grid-cols-4 gap-1">
                 {[
                   { id: 'auto', label: 'Auto', icon: ScanFace },
@@ -230,7 +227,6 @@ function App() {
                 ))}
               </div>
 
-              {/* Upload Areas */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-2">
                   <span className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Model Reference</span>
@@ -252,7 +248,6 @@ function App() {
                 </div>
               </div>
 
-              {/* Product Description */}
               <div className="flex flex-col gap-2">
                 <div className="flex justify-between items-center">
                   <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Product Description</label>
@@ -273,7 +268,6 @@ function App() {
                 />
               </div>
 
-              {/* Brand Text */}
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Brand Text</label>
                 <input 
@@ -285,7 +279,6 @@ function App() {
                 />
               </div>
 
-              {/* Creative Text Overlay */}
               <div className="flex flex-col gap-4 border-t border-b border-gray-100 dark:border-slate-800 py-4">
                 <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-medium">
                   <Type className="w-4 h-4" />
@@ -295,7 +288,6 @@ function App() {
                   </div>
                 </div>
 
-                {/* Text Content */}
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Text to Render</label>
                   <input
@@ -307,9 +299,7 @@ function App() {
                   />
                 </div>
 
-                {/* Grid for settings */}
                 <div className="grid grid-cols-2 gap-3">
-                    {/* Font Style */}
                     <div className="flex flex-col gap-1">
                         <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Font Style</label>
                         <select
@@ -327,7 +317,6 @@ function App() {
                         </select>
                     </div>
 
-                    {/* Text Size */}
                     <div className="flex flex-col gap-1">
                         <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Text Size</label>
                         <select
@@ -342,7 +331,6 @@ function App() {
                         </select>
                     </div>
 
-                    {/* Text Color */}
                     <div className="flex flex-col gap-1">
                         <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Text Color</label>
                         <select
@@ -357,7 +345,6 @@ function App() {
                         </select>
                     </div>
 
-                    {/* Text Position */}
                     <div className="flex flex-col gap-1">
                         <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Placement</label>
                         <select
@@ -375,7 +362,6 @@ function App() {
                         </select>
                     </div>
 
-                    {/* Shadow */}
                     <div className="flex flex-col gap-1">
                         <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Shadow</label>
                         <select
@@ -390,7 +376,6 @@ function App() {
                         </select>
                     </div>
 
-                    {/* Readability */}
                     <div className="flex flex-col gap-1">
                         <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Readability</label>
                         <select
@@ -406,7 +391,6 @@ function App() {
                 </div>
               </div>
 
-              {/* Aspect Ratio */}
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Aspect Ratio</label>
                 <AspectRatioSelector 
@@ -415,7 +399,6 @@ function App() {
                 />
               </div>
 
-              {/* Scene Description */}
               <div className="flex flex-col gap-2">
                 <div className="flex justify-between items-center">
                   <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Scene Description</label>
@@ -436,7 +419,6 @@ function App() {
                 />
               </div>
 
-              {/* Action Button */}
               <button 
                 onClick={handleGenerate}
                 disabled={isGenerateDisabled}
@@ -460,17 +442,14 @@ function App() {
                   {error}
                 </div>
               )}
-
             </div>
 
-            {/* RIGHT COLUMN: PREVIEW & EDIT */}
             <div className="flex-1 w-full bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-800 p-6 flex flex-col h-full min-h-[600px] transition-colors">
               <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-medium mb-4">
                 <ImageIcon className="w-5 h-5" />
                 <h2>Preview</h2>
               </div>
               
-              {/* Image Preview Area */}
               <div className="flex-1 bg-gray-50 dark:bg-slate-950 rounded-xl border border-dashed border-gray-200 dark:border-slate-700 flex items-center justify-center overflow-hidden relative group min-h-[400px]">
                 {generatedImage ? (
                   <>
@@ -514,7 +493,6 @@ function App() {
                 )}
               </div>
 
-              {/* Magic Edit Section */}
               <div className="mt-6 pt-6 border-t border-gray-100 dark:border-slate-800">
                 <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-medium mb-3">
                   <Sparkles className="w-4 h-4" />
